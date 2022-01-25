@@ -1,0 +1,71 @@
+# 启动命令
+version: '3'
+services:
+  # redis
+  breeze-redis:
+    image: redis
+    container_name: breeze-redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ./docker/redis/conf/redis.conf:/etc/redis/redis.conf
+      - ./docker/redis/data/:/data
+    command: 
+      redis-server /etc/redis/redis.conf
+
+  # 数据库5.7版本
+  breeze-mysql5.7:
+    image: mysql:5.7
+    container_name: breeze-mysql5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: breeze_config
+    ports:
+      - 3306:3306
+    volumes:
+      - ./docker/mysql/data/:/var/lib/mysql
+      - ./docker/mysql/conf.d/:/etc/mysql/conf.d
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+
+  breeze-nacos:
+    image: nacos/nacos-server:2.0.2
+    container_name: breeze-nacos
+    restart: always
+    depends_on:
+      - breeze-mysql5.7
+    environment:
+      # PREFER_HOST_MODE: hostname #如果支持主机名可以使用hostname,否则使用ip，默认也是ip
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MODE: standalone
+      MYSQL_SERVICE_HOST: breeze-mysql5.7
+      MYSQL_SERVICE_DB_NAME: breeze_config
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: root
+      NACOS_APPLICATION_PORT: 8848
+      JVM_XMS: 512m
+      JVM_MMS: 320m
+    volumes:
+      - ./docker/nacos/standalone-logs/:/home/nacos/logs
+      - ./docker/nacos/plugins/:/home/nacos/plugins
+      - ./docker/nacos/conf/application.properties:/home/nacos/conf/application.properties
+    ports:
+      - "8848:8848"
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./docker/prometheus/prometheus-standalone.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - breeze-nacos
+    restart: on-failure
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    restart: on-failure
