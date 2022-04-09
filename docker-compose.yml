@@ -11,7 +11,7 @@ services:
     volumes:
       - ./docker/redis/conf/redis.conf:/etc/redis/redis.conf
       - ./docker/redis/data/:/data
-    command: 
+    command:
       redis-server /etc/redis/redis.conf
 
   # 数据库5.7版本
@@ -68,4 +68,15 @@ services:
     image: grafana/grafana:latest
     ports:
       - 3000:3000
+    restart: on-failure
+  breeze-sentinel-dashboard:
+    container_name: breeze-sentinel-dashboard
+    image: breezeworker/breeze-sentinel-dashboard:1.8.3
+    ports:
+      - "8080:8080"
+    environment:
+      USERNAME: admin
+      PASSWORD: admin
+    depends_on:
+      - breeze-nacos
     restart: on-failure
