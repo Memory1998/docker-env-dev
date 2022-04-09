@@ -7,7 +7,7 @@ services:
     container_name: breeze-redis
     restart: always
     ports:
-      - 6379:6379
+      - "6379:6379"
     volumes:
       - ./docker/redis/conf/redis.conf:/etc/redis/redis.conf
       - ./docker/redis/data/:/data
@@ -23,7 +23,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: breeze_config
     ports:
-      - 3306:3306
+      - "3306:3306"
     volumes:
       - ./docker/mysql/data/:/var/lib/mysql
       - ./docker/mysql/conf.d/:/etc/mysql/conf.d
@@ -67,7 +67,7 @@ services:
     container_name: grafana
     image: grafana/grafana:latest
     ports:
-      - 3000:3000
+      - "3000:3000"
     restart: on-failure
   breeze-sentinel-dashboard:
     container_name: breeze-sentinel-dashboard
