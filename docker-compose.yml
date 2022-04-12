@@ -75,6 +75,8 @@ services:
     ports:
       - "8080:8080"
     environment:
+      NACOS_HOST: breeze-nacos
+      NACOS_PORT: 8848
       USERNAME: admin
       PASSWORD: admin
     depends_on:
