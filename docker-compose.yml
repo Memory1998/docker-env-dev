@@ -26,8 +26,7 @@ services:
       - "3306:3306"
     volumes:
       - ./docker/mysql/data/:/var/lib/mysql
-      - ./docker/mysql/conf.d/:/etc/mysql/conf.d
-      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+      - ./docker/mysql/my.cnf:/etc/my.cnf
 
   breeze-nacos:
     image: nacos/nacos-server:2.0.2
@@ -69,6 +68,7 @@ services:
     ports:
       - "3000:3000"
     restart: on-failure
+
   breeze-sentinel-dashboard:
     container_name: breeze-sentinel-dashboard
     image: breezeworker/breeze-sentinel-dashboard:1.8.3
