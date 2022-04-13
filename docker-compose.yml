@@ -5,6 +5,8 @@ services:
   breeze-redis:
     image: redis
     container_name: breeze-redis
+    networks:
+      - breeze-net
     restart: always
     ports:
       - "6379:6379"
@@ -18,6 +20,8 @@ services:
   breeze-mysql5.7:
     image: mysql:5.7
     container_name: breeze-mysql5.7
+    networks:
+      - breeze-net
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -31,6 +35,8 @@ services:
   breeze-nacos:
     image: nacos/nacos-server:2.0.2
     container_name: breeze-nacos
+    networks:
+      - breeze-net
     restart: always
     depends_on:
       - breeze-mysql5.7
@@ -55,6 +61,8 @@ services:
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
+    networks:
+      - breeze-net
     volumes:
       - ./docker/prometheus/prometheus-standalone.yaml:/etc/prometheus/prometheus.yml
     ports:
@@ -72,6 +80,8 @@ services:
   breeze-sentinel-dashboard:
     container_name: breeze-sentinel-dashboard
     image: breezeworker/breeze-sentinel-dashboard:1.8.3
+    networks:
+      - breeze-net
     ports:
       - "8080:8080"
     environment:
@@ -87,6 +97,8 @@ services:
   breeze-seata-server-1:
     image: seataio/seata-server:latest
     container_name: breeze-seata-server-1
+    networks:
+      - breeze-net
     hostname: breeze-seata-server
     ports:
       - "8091:8091"
@@ -105,6 +117,8 @@ services:
   breeze-seata-server-2:
     image: seataio/seata-server:latest
     container_name: breeze-seata-server-2
+    networks:
+      - breeze-net
     hostname: breeze-seata-server
     ports:
       - "8092:8092"
@@ -118,3 +132,8 @@ services:
     volumes:
       # 因为registry.conf中是nacos配置中心，只需要把registry.conf放到./seata-server/config文件夹中
       - "./docker/seata-server/config:/root/seata-config"
+
+networks:
+  breeze-net:
+    # 如果要创建外部隔离的覆盖网络，您可以将此internal选项设置为true
+    external: false
