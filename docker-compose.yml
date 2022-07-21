@@ -29,8 +29,11 @@ services:
     ports:
       - "3306:3306"
     volumes:
+      - ./docker/mysql/db/:/docker-entrypoint-initdb.d
+      - ./docker/mysql/conf:/etc/mysql/conf.d
       - ./docker/mysql/data/:/var/lib/mysql
-      - ./docker/mysql/my.cnf:/etc/my.cnf
+      - ./docker/mysql/logs/:/var/log
+      - /etc/localtime:/etc/localtime:ro
 
   breeze-nacos:
     image: nacos/nacos-server:2.0.2
