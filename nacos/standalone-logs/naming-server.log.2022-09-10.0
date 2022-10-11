@@ -1,0 +1,24 @@
+2022-09-10 03:55:55,498 WARN naming.distro config will be removed, please use core.protocol.distro replace.
+
+2022-09-10 03:55:55,498 WARN Using naming.distro config to replace core.distro config
+
+2022-09-10 03:55:56,048 INFO open empty service auto clean job, initialDelay : 50000 ms, period : 30000 ms
+
+2022-09-10 03:55:56,055 INFO listen for service meta change
+
+2022-09-10 12:36:51,757 WARN naming.distro config will be removed, please use core.protocol.distro replace.
+
+2022-09-10 12:36:51,757 WARN Using naming.distro config to replace core.distro config
+
+2022-09-10 12:36:52,166 INFO open empty service auto clean job, initialDelay : 50000 ms, period : 30000 ms
+
+2022-09-10 12:36:52,174 INFO listen for service meta change
+
+2022-09-10 16:45:41,753 WARN naming.distro config will be removed, please use core.protocol.distro replace.
+
+2022-09-10 16:45:41,753 WARN Using naming.distro config to replace core.distro config
+
+2022-09-10 16:45:42,499 INFO open empty service auto clean job, initialDelay : 50000 ms, period : 30000 ms
+
+2022-09-10 16:45:42,513 INFO listen for service meta change
+
