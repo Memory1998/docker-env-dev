@@ -25,7 +25,7 @@ services:
     container_name: breeze-mysql
     restart: always
     environment:
-      MYSQL_DATABASE: breeze_test
+      MYSQL_DATABASE: breeze_config
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"
