@@ -28,7 +28,7 @@ services:
   breeze-mysql:
     image: mysql:8.0.16
     container_name: breeze-mysql
-    hostname : breeze-mysql
+    hostname: breeze-mysql
     restart: always
     environment:
       MYSQL_DATABASE: breeze_config
@@ -147,6 +147,23 @@ services:
     networks:
       - breeze-net
 
+  breeze-mongodb:
+    image: mongo:4.2.3
+    container_name: breeze-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb/data/db:/data/db
+      - /etc/localtime:/etc/localtime
+    environment:
+      TZ: Asia/Shanghai
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    privileged: true
+    restart: always
+    networks:
+      - breeze-net
+
   # rabbitMq服务
   breeze-rabbitmq:
     image: rabbitmq:3.9.13-management
@@ -158,9 +175,9 @@ services:
       - "5672:5672" # 管理界面ui端口
       - "25672:25672" # server间内部通信口
     volumes:
-      - "./docker/rabbitmq/data:/var/lib/rabbitmq"
-      - "./docker/rabbitmq/log:/var/log/rabbitmq/log"
-      - "./log:/var/log/rabbitmq/log"
+      - ./rabbitmq/data:/var/lib/rabbitmq
+      - ./rabbitmq/log:/var/log/rabbitmq/log
+      - ./log:/var/log/rabbitmq/log
     #环境变量
     environment:
       - RABBITMQ_DEFAULT_VHOST=breeze
@@ -192,7 +209,7 @@ services:
     networks:
       - breeze-net
 
-   # seata服务1
+  # seata服务1
   breeze-seata-server-1:
     image: seataio/seata-server:latest
     container_name: breeze-seata-server-1
@@ -211,6 +228,8 @@ services:
       # 因为registry.conf中是nacos配置中心，只需要把registry.conf放到./seata-server/config文件夹中
       - ./seata-server/config:/root/seata-config
       - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    restart: always
     networks:
       - breeze-net
 
@@ -233,6 +252,25 @@ services:
       # 因为registry.conf中是nacos配置中心，只需要把registry.conf放到./seata-server/config文件夹中
       - ./seata-server/config:/root/seata-config
       - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    restart: always
+    networks:
+      - breeze-net
+
+  breeze-postgresql:
+    image: postgres:9.6.2
+    container_name: breeze-postgresql
+    hostname: breeze-postgresql
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: root
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql/data/pgdata
+      - /etc/localtime:/etc/localtime:ro
+    privileged: true
+    restart: always
     networks:
       - breeze-net
 
