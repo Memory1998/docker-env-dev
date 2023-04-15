@@ -1,48 +1,65 @@
 # 启动命令
 version: '3'
 services:
-  # redis-server
+  # redis
   breeze-redis:
     image: redis
     container_name: breeze-redis
+    hostname: breeze-redis
     restart: always
     ports:
       - "6379:6379"
     expose:
       - "6379"
+    environment:
+      TZ: Asia/Shanghai
     volumes:
       - ./redis/conf/redis.conf:/etc/redis/redis.conf
       - ./redis/data/:/data
+      - ./redis/logs/:/logs
       - /etc/localtime:/etc/localtime:ro
     command:
       redis-server /etc/redis/redis.conf
+    privileged: true
     networks:
       - breeze-net
 
-  # 数据库5.7版本
+  # 数据库
   breeze-mysql:
-    image: mysql:5.7
+    image: mysql:8.0.16
     container_name: breeze-mysql
+    hostname : breeze-mysql
     restart: always
     environment:
       MYSQL_DATABASE: breeze_config
       MYSQL_ROOT_PASSWORD: root
+      TZ: Asia/Shanghai
     ports:
-      - "3306:3306"
+      - "3366:3306"
     expose:
-      - "3306"
+      - "3366"
     volumes:
-      - /usr/local/soft/docker-env-dev/mysql/db/breeze_config.sql /docker-entrypoint-initdb.d/
-      - ./mysql/conf:/etc/mysql/conf.d
+      # - /usr/local/soft/docker-env-dev/mysql/db/breeze_config.sql /docker-entrypoint-initdb.d/
+      - ./mysql/conf/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/conf.d:/etc/mysql/conf.d
       - ./mysql/data/:/var/lib/mysql
-      - ./mysql/logs/:/var/log
+      - ./mysql/logs:/var/log/mysql
       - /etc/localtime:/etc/localtime:ro
+    command:
+      # 可以配置在mysql的 my.cnf 中
+      --max_connections=1024
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --default-authentication-plugin=mysql_native_password
+      --default-time_zone='+8:00'
+    privileged: true
     networks:
       - breeze-net
 
   breeze-nacos:
     image: nacos/nacos-server:2.0.1
     container_name: breeze-nacos
+    hostname: breeze-nacos
     restart: always
     depends_on:
       - breeze-mysql
@@ -58,6 +75,7 @@ services:
       NACOS_APPLICATION_PORT: 8848
       JVM_XMS: 512m
       JVM_MMS: 320m
+      TZ: Asia/Shanghai
     volumes:
       - ./nacos/standalone-logs/:/home/nacos/logs
       - ./nacos/plugins/:/home/nacos/plugins
@@ -65,34 +83,53 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "8848:8848"
+      - "7848:7848"
+      - "9848:9848"
+    expose:
+      - "7848"
+      - "8848"
+      - "9848"
+    privileged: true
     networks:
       - breeze-net
 
-  prometheus:
-    container_name: prometheus
+  breeze-prometheus:
+    container_name: breeze-prometheus
+    hostname: breeze-prometheus
     image: prom/prometheus:latest
+    environment:
+      TZ: Asia/Shanghai
     volumes:
-      - ./prometheus/prometheus-standalone.yaml:/etc/prometheus/prometheus.yml
+      - ./prometheus/conf/prometheus-standalone.yaml:/etc/prometheus/prometheus.yml
+      - /etc/localtime:/etc/localtime:ro
     ports:
       - "9090:9090"
     depends_on:
       - breeze-nacos
     restart: on-failure
+    privileged: true
     networks:
       - breeze-net
 
-  grafana:
-    container_name: grafana
+  breeze-grafana:
+    container_name: breeze-grafana
     image: grafana/grafana:latest
+    hostname: breeze-grafana
+    environment:
+      TZ: Asia/Shanghai
     ports:
       - "3000:3000"
     restart: on-failure
+    privileged: true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - breeze-net
 
   breeze-sentinel-dashboard:
     container_name: breeze-sentinel-dashboard
     image: breezeworker/breeze-sentinel-dashboard:1.8.3
+    hostname: breeze-sentinel-dashboard
     ports:
       - "8080:8080"
     environment:
@@ -100,13 +137,62 @@ services:
       NACOS_PORT: 8848
       USERNAME: admin
       PASSWORD: admin
+      TZ: Asia/Shanghai
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
     depends_on:
       - breeze-nacos
     restart: on-failure
+    privileged: true
     networks:
       - breeze-net
 
-  # seata服务1
+  # rabbitMq服务
+  breeze-rabbitmq:
+    image: rabbitmq:3.9.13-management
+    container_name: breeze-rabbitmq
+    hostname: breeze-rabbitmq
+    ports:
+      - "4369:4369"
+      - "15672:15672" # client端通信口
+      - "5672:5672" # 管理界面ui端口
+      - "25672:25672" # server间内部通信口
+    volumes:
+      - "./docker/rabbitmq/data:/var/lib/rabbitmq"
+      - "./docker/rabbitmq/log:/var/log/rabbitmq/log"
+      - "./log:/var/log/rabbitmq/log"
+    #环境变量
+    environment:
+      - RABBITMQ_DEFAULT_VHOST=breeze
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=123456
+    privileged: true
+    restart: always
+    networks:
+      - breeze-net
+
+  breeze-minio:
+    container_name: breeze-minio
+    image: minio/minio
+    hostname: breeze-minio
+    ports:
+      - "9092:9092" # api端口
+      - "9091:9091" # 控制台端口
+    environment:
+      MINIO_ACCESS_KEY: admin     #管理平台用户名
+      MINIO_SECRET_KEY: 12345678    #管理平台密码
+      TZ: Asia/Shanghai
+    volumes:
+      - ./minio/data:/data
+      - ./minio/config:/root/.minio/
+      - /etc/localtime:/etc/localtime:ro
+    command: server --console-address ':9091' --address ':9092' /data  #指定容器中的目录 /data
+    privileged: true
+    restart: always
+    networks:
+      - breeze-net
+
+   # seata服务1
   breeze-seata-server-1:
     image: seataio/seata-server:latest
     container_name: breeze-seata-server-1
@@ -115,14 +201,16 @@ services:
       - "8091:8091"
     environment:
       # 指定 seata 服务启动端口
-      - SEATA_PORT=8091
+      SEATA_PORT: 8091
       # 注册到 nacos 上的ip。客户端将通过该ip访问seata服务。
       # 注意公网ip和内网ip的差异。
-      - SEATA_IP=127.0.0.1
-      - SEATA_CONFIG_NAME=file:/root/seata-config/registry
+      SEATA_IP: 127.0.0.1
+      SEATA_CONFIG_NAME: file:/root/seata-config/registry
+      TZ: Asia/Shanghai
     volumes:
       # 因为registry.conf中是nacos配置中心，只需要把registry.conf放到./seata-server/config文件夹中
-      - "./seata-server/config:/root/seata-config"
+      - ./seata-server/config:/root/seata-config
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - breeze-net
 
@@ -135,14 +223,16 @@ services:
       - "8092:8092"
     environment:
       # 指定seata服务启动端口
-      - SEATA_PORT=8092
+      SEATA_PORT: 8092
       # 注册到nacos上的ip。客户端将通过该ip访问seata服务。
       # 注意公网ip和内网ip的差异。
-      - SEATA_IP=127.0.0.1
-      - SEATA_CONFIG_NAME=file:/root/seata-config/registry
+      SEATA_IP: 127.0.0.1
+      SEATA_CONFIG_NAME: file:/root/seata-config/registry
+      TZ: Asia/Shanghai
     volumes:
       # 因为registry.conf中是nacos配置中心，只需要把registry.conf放到./seata-server/config文件夹中
-      - "./seata-server/config:/root/seata-config"
+      - ./seata-server/config:/root/seata-config
+      - /etc/localtime:/etc/localtime:ro
     networks:
       - breeze-net
 
@@ -166,6 +256,7 @@ services:
       BREEZE_MYSQL_DB_NAME: breeze_admin
       BREEZE_MYSQL_USERNAME: root
       BREEZE_MYSQL_PASSWORD: root
+      TZ: Asia/Shanghai
     volumes:
       - ./java/breeze-boot/logs:/usr/local/breeze/logs
       - ./java/breeze-boot/upload:/usr/local/breeze/upload
@@ -183,6 +274,8 @@ services:
   breeze-nginx:
     container_name: breeze-nginx
     image: nginx:1.16
+    environment:
+      TZ: Asia/Shanghai
     ports:
       - "80:80"
     expose:
