@@ -8,9 +8,9 @@ services:
     hostname: breeze-redis
     restart: always
     ports:
-      - "6379:6379"
+      - "6378:6379"
     expose:
-      - "6379"
+      - "6378"
     environment:
       TZ: Asia/Shanghai
     volumes:
