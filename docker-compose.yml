@@ -64,26 +64,25 @@ services:
     depends_on:
       - breeze-mysql
     environment:
-      # PREFER_HOST_MODE: hostname #如果支持主机名可以使用hostname,否则使用ip，默认也是ip
-      SPRING_DATASOURCE_PLATFORM: mysql
+      PREFER_HOST_MODE: hostname #如果支持主机名可以使用hostname,否则使用ip，默认也是ip
       MODE: standalone
+      SPRING_DATASOURCE_PLATFORM: mysql
       MYSQL_SERVICE_HOST: breeze-mysql
       MYSQL_SERVICE_DB_NAME: breeze_config
+      MYSQL_SERVICE_DB_PARAM: "characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&serverTimezone=UTC"
       MYSQL_SERVICE_PORT: 3306
       MYSQL_SERVICE_USER: root
       MYSQL_SERVICE_PASSWORD: root
-      NACOS_APPLICATION_PORT: 8848
       JVM_XMS: 512m
       JVM_MMS: 320m
       TZ: Asia/Shanghai
     volumes:
       - ./nacos/standalone-logs/:/home/nacos/logs
       - ./nacos/plugins/:/home/nacos/plugins
-      - ./nacos/conf/application.properties:/home/nacos/conf/application.properties
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "8848:8848"
-      - "7848:7848"
+      - "9849:9849"
       - "9848:9848"
     expose:
       - "7848"
