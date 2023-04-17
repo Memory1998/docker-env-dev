@@ -57,7 +57,7 @@ services:
       - breeze-net
 
   breeze-nacos:
-    image: nacos/nacos-server:2.0.1
+    image: nacos/nacos-server:v2.1.1
     container_name: breeze-nacos
     hostname: breeze-nacos
     restart: always
