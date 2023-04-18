@@ -176,7 +176,6 @@ services:
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
       - ./rabbitmq/log:/var/log/rabbitmq/log
-      - ./log:/var/log/rabbitmq/log
     #环境变量
     environment:
       - RABBITMQ_DEFAULT_VHOST=breeze
