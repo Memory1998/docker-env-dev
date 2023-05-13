@@ -119,6 +119,22 @@ services:
     networks:
       - elastic
 
+  elasticsearch-hd:
+    image: containerize/elastichd:latest
+    container_name: elasticsearch-hd
+    ports:
+      - "9800:9800"
+    depends_on:
+      - es01
+      - es02
+      - es03
+    links:
+      - es01:es01 #可以用es这个域名访问elasticsearch服务
+      - es03:es02 #可以用es这个域名访问elasticsearch服务
+      - es03:es03 #可以用es这个域名访问elasticsearch服务
+    networks:
+      - elastic
+
 networks:
   elastic:
     driver: bridge
