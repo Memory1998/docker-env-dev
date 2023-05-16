@@ -82,12 +82,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "8848:8848"
-      - "9849:9849"
-      - "9848:9848"
+      - "9949:9949"
+      - "9948:9948"
     expose:
-      - "7848"
       - "8848"
-      - "9848"
+      - "9948"
+      - "9949"
     privileged: true
     networks:
       - breeze-net
