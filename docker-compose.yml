@@ -57,7 +57,7 @@ services:
       - breeze-net
 
   breeze-nacos:
-    image: nacos/nacos-server:v2.1.1
+    image: nacos/nacos-server:v2.2.0
     container_name: breeze-nacos
     hostname: breeze-nacos
     restart: always
@@ -82,12 +82,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
     ports:
       - "8848:8848"
-      - "9949:9949"
-      - "9948:9948"
+      - "9848:9848"
+      - "9849:9849"
     expose:
       - "8848"
-      - "9948"
-      - "9949"
+      - "9848"
+      - "9849"
     privileged: true
     networks:
       - breeze-net
